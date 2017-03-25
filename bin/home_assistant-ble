@@ -5,7 +5,11 @@ require 'yaml'
 
 config_file = ARGV.shift
 config = {}
-config = YAML.load_file(config_file) if config_file
+if config_file
+  config = YAML.load_file(config_file)
+else
+  $stderr.puts 'No configuration file specified, will use all default values'
+end
 
 detector = HomeAssistant::Ble::Detector.new(config)
 

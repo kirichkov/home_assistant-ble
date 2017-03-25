@@ -1,6 +1,9 @@
 require 'home_assistant/ble/version'
 require 'ble'
 require 'mash'
+require 'net/http'
+require 'uri'
+require 'json'
 
 module HomeAssistant
   module Ble
@@ -22,6 +25,19 @@ module HomeAssistant
         config['grace_period'] || 60
       end
 
+      def home_assistant_url
+        config['home_assistant_url'] || 'http://localhost:8123'
+      end
+
+      def home_assistant_password
+        config['home_assistant_password']
+      end
+
+      def home_assistant_devices
+        # TODO: read this from HA known_devices.yml
+        config['home_assistant_devices'] || {}
+      end
+
       def run
         loop do
           detect_devices
@@ -38,12 +54,18 @@ module HomeAssistant
       end
 
       def debug(message)
-        puts message
+        log 'Set DEBUG environment variable to activate debug logs' unless ENV['DEBUG'] || @debug_tip
+        @debug_tip = true
+        print "(debug) "
+        puts message if ENV['DEBUG']
       end
 
       def detect_devices
         adapter.devices.each do |name|
-          log "Just discovered #{name}" unless known_devices.key?(name)
+          unless known_devices.key?(name)
+            log "Just discovered #{name}"
+            home_assistant_devices[name] && update_home_assistant(home_assistant_devices[name], :home)
+          end
           known_devices[name] = Time.now
         end
       end
@@ -55,7 +77,30 @@ module HomeAssistant
         disappeared.each do |name|
           known_devices.delete(name).tap do |last_seen|
             log "#{name} has disappeared (last seen #{last_seen})"
+            home_assistant_devices[name] && update_home_assistant(home_assistant_devices[name], :not_home)
           end
+        end
+      end
+
+      def update_home_assistant(ha_name, state)
+        uri = URI.join(home_assistant_url, "api/states/device_tracker.#{ha_name}")
+        request = Net::HTTP::Post.new(uri)
+        request.content_type = 'application/json'
+        request['X-Ha-Access'] = home_assistant_password if home_assistant_password
+        request.body = JSON.dump('state' => state)
+        req_options = { use_ssl: uri.scheme == 'https' }
+
+        response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
+          http.request(request)
+        end
+
+        if response.code.to_i == 200
+          debug "State update #{state} sent to HA for #{ha_name}"
+          debug response.body
+        else
+          log "Error while sending #{state} to HA form #{ha_name}."
+          log "URI was: #{uri}. Response was:"
+          log response.body
         end
       end
 
