@@ -56,7 +56,7 @@ module HomeAssistant
       def debug(message)
         log 'Set DEBUG environment variable to activate debug logs' unless ENV['DEBUG'] || @debug_tip
         @debug_tip = true
-        print "(debug) "
+        print '(debug) '
         puts message if ENV['DEBUG']
       end
 
