@@ -53,7 +53,9 @@ module HomeAssistant
           Time.now - known_devices[name] > grace_period
         end
         disappeared.each do |name|
-          log "#{name} has disappeared"
+          known_devices.delete(name).tap do |last_seen|
+            log "#{name} has disappeared (last seen #{last_seen})"
+          end
         end
       end
 
@@ -61,7 +63,7 @@ module HomeAssistant
         @adapter ||= begin
                        iface = BLE::Adapter.list.first
                        debug "Selecting #{iface} to listen for bluetooth events"
-                       raise 'Unable to find a bluetooth device'
+                       raise 'Unable to find a bluetooth device' unless iface
                        BLE::Adapter.new(iface).tap do |a|
                          debug 'Activating discovery'
                          a.start_discovery

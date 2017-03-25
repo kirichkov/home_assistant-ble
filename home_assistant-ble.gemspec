@@ -25,4 +25,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rubocop'
 
   spec.add_runtime_dependency 'ble'
+  spec.add_runtime_dependency 'mash'
 end
