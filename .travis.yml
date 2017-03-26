@@ -10,3 +10,8 @@ deploy:
   gem: home_assistant-ble
   on:
     repo: kamaradclimber/home_assistant-ble
+addons:
+  apt:
+    packages:
+      - libcap2-bin
+      - libcap2-dev
