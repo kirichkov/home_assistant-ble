@@ -1,5 +1,12 @@
 sudo: false
 language: ruby
 rvm:
-  - 2.4.0
+- 2.4.0
 before_install: gem install bundler -v 1.13.7
+deploy:
+  provider: rubygems
+  api_key:
+    secure: lVf2UKHDuEQZRws/MngarUz8p6Uj8Ved7dNq/Yo2RVX8y+Sdn9Ig5pJyPKBEO+4GIxGQDpxZjBYuJS2fhwWHQ2//LCXxqzol1Q19JxQrgciMsk9xiWbM7mnjt/cJ3RgsvNMIlrcjTKGRLBtVW5BmEn9uaxrx0VW8ZQtpx46VY848KZGkGePxNXhsp9qLNYT/XwbS5PP+SAZuTDSKQFJJyGNP+vArgamMDs0P3LxJW38YrlRUGhDHlBRrSbkLCCOTIAeT8X7ZHK1asGgd4h7dxk22kXbm/2xaXghlANKZ7cp9N46euYieX+egHBFmdo2O3nFWS0ZSoeOJonGC3rleorz9zNIK3kCOOmQ4WdIXCKvNVD0SRYA8T7rOe8zZ73dcKaLlJqlisyhqpwEzto1SrArAslrzlwbYYFUakPIJAw/5nCRKYwi0Tmgmg0ojlK0Ym+0irfVgEG669Qq/dg2AsrfRLcb/dig+tve7Nn4GvjfwJXkV6dzSfiOL1r4z4wIFTLD0q6oQIAXgoIeyM1dsQIDZYnN8eHeg0d4pmVPpmuGqowk2AFmOUc2DyZZMKh8Xfwm5uSbz8tK043J/SkcSwPToUEw2jNnG8PaIzIIWp/uSG82LLReQOGE7MFxc0eJAcYeQnCZvNDAzQtNq5pAmkhst6PvOYJ0cKBe+XOtr0Ls=
+    gem: home_assistant-ble
+    on:
+      repo: kamaradclimber/home_assistant-ble

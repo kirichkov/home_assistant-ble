@@ -6,6 +6,8 @@ require 'home_assistant/ble/version'
 Gem::Specification.new do |spec|
   spec.name          = 'home_assistant-ble'
   spec.version       = HomeAssistant::Ble::VERSION
+  spec.version       = "#{spec.version}-alpha-#{ENV['TRAVIS_BUILD_NUMBER']}" if ENV['TRAVIS']
+  spec.version       = ENV['TRAVIS_TAG'] if ENV['TRAVIS_TAG']
   spec.authors       = ['Grégoire Seux']
   spec.email         = ['grego_homeassistant@familleseux.net']
 
