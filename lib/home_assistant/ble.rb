@@ -4,6 +4,7 @@ require 'mash'
 require 'net/http'
 require 'uri'
 require 'json'
+require 'cap2'
 
 module HomeAssistant
   module Ble
@@ -123,6 +124,9 @@ module HomeAssistant
       rescue DBus::Error => e
         raise unless e.message =~ /DBus.Error.AccessDenied/
         log 'Not enough rights to use bluetooth device, read https://github.com/kamaradclimber/home_assistant-ble'
+        log 'See also https://github.com/kamaradclimber/home_assistant-ble/issues/1'
+        log 'Current capabilities:'
+        log Cap2.process.inspect
         exit 1
       end
     end

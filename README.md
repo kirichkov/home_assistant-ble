@@ -24,6 +24,7 @@ To be able to run with a non-root user, read http://unix.stackexchange.com/quest
 sudo apt install libcap2-bin
 sudo setcap 'cap_net_raw,cap_net_admin+eip' `readlink -f \`which ruby\``
 ```
+**Note**: these instructions are probably not sufficient, see https://github.com/kamaradclimber/home_assistant-ble/issues/1
 
 ## Configuration
 
