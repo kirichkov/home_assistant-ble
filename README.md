@@ -16,8 +16,14 @@ $ `gem install home_assistant-ble`
 
 Run `home_assistant-ble [your config file]` binary.
 
-More instruction to launch this as a service with systemd (TODO).
+### Systemd
 
+To launch as a systemd service, you can copy `home_assistant-ble.service` file present in this repo.
+
+I'll probably build an archlinux package at some point (TODO).
+
+
+### Non noot
 To be able to run with a non-root user, read http://unix.stackexchange.com/questions/96106/bluetooth-le-scan-as-non-root. In short (adapt if using a non-debian distribution):
 
 ```
@@ -26,7 +32,7 @@ sudo setcap 'cap_net_raw,cap_net_admin+eip' `readlink -f \`which ruby\``
 ```
 **Note**: these instructions are probably not sufficient, see https://github.com/kamaradclimber/home_assistant-ble/issues/1
 
-## Configuration
+### Configuration
 
 ```
 interval: 30                              # in seconds, interval between device scan

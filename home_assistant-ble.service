@@ -1,0 +1,13 @@
+[Unit]
+Description=Home assistant BLE
+After=network.target
+
+[Service]
+#User=hass
+#Group=hass
+
+Environment=RUBYOPT="-w0"
+ExecStart=/usr/bin/home_assistant-ble /var/lib/hass/ble.yml
+
+[Install]
+WantedBy=multi-user.target
