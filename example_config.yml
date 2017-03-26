@@ -3,4 +3,5 @@ grace_period: 60 # in seconds
 home_assistant_url: http://localhost:8123
 # home_assistant_password: xxxxx
 home_assistant_devices:
-  F0:5C:F4:EA:BF:C8: nut1
+  F0:5C:F4:EA:BE:C1: a_device
+home_assistant_devices_file: /var/lib/hass/known_devices.yaml

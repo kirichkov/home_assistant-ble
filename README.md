@@ -35,12 +35,12 @@ sudo setcap 'cap_net_raw,cap_net_admin+eip' `readlink -f \`which ruby\``
 ### Configuration
 
 ```
-interval: 30                              # in seconds, interval between device scan
-grace_period: 60                          # in seconds, delay before considering a device has disappeared
-home_assistant_url: http://localhost:8123 # url to contact home-assistant
-home_assistant_password: xxxxx            # non mandatory password to authenticate to home-assistant api
-home_assistant_devices:                   # devices whose activity will be sent to home-assistant.
+interval: 30                              # in seconds, interval between device scan. Defaults to 30
+grace_period: 60                          # in seconds, delay before considering a device has disappeared. Defaults to 60
+home_assistant_url: http://localhost:8123 # url to contact home-assistant. Defaults to http://localhost:8123
+home_assistant_password: xxxxx            # non mandatory password to authenticate to home-assistant api. Default is nil
+home_assistant_devices:                   # devices whose activity will be sent to home-assistant. Default is empty (no tracked devices)
   F0:5C:F4:EA:BF:C8: nut1                 # [macaddress]: [identifier for home-assistant]
-```
 
-All presented settings (except `home_assistant_devices`) are set to their _default_  values. They don't need to be set.
+home_assistant_devices_file: /var/lib/hass/known_devices.yaml # read devices whose activity will be sent to home-assistant. Default is empty (devices from home-assistant are not tracked). This can easily replace home_assistant_devices setting.
+```

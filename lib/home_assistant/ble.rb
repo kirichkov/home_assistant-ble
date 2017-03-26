@@ -35,8 +35,17 @@ module HomeAssistant
       end
 
       def home_assistant_devices
-        # TODO: read this from HA known_devices.yml
-        config['home_assistant_devices'] || {}
+        devices = {}
+        if  config['home_assistant_devices_file']
+          YAML.load_file(config['home_assistant_devices_file']).each do |name, conf|
+            next unless conf['mac'] =~ /^(ble_|bt_)/i
+            next unless conf['track']
+            mac = conf['mac'].gsub(/^(ble_|bt_)/i, '').upcase
+            devices[mac] = name
+            debug "Adding #{mac} (#{name}) found in known_devices.yaml"
+          end
+        end
+        devices.merge!(config['home_assistant_devices']) if config['home_assistant_devices']
       end
 
       def run
