@@ -3,6 +3,12 @@
 require 'home_assistant/ble'
 require 'yaml'
 
+# force stdout/stderr to flush immediately
+# this will allow to follow logs when launched via systemd
+# the performance penalty is neglected since this is not a real-time program
+$stdout.sync = true
+$stderr.sync = true
+
 config_file = ARGV.shift
 config = {}
 if config_file
