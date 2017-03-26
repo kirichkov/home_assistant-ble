@@ -18,6 +18,13 @@ Run `home_assistant-ble [your config file]` binary.
 
 More instruction to launch this as a service with systemd (TODO).
 
+To be able to run with a non-root user, read http://unix.stackexchange.com/questions/96106/bluetooth-le-scan-as-non-root. In short (adapt if using a non-debian distribution):
+
+```
+sudo apt install libcap2-bin
+sudo setcap 'cap_net_raw,cap_net_admin+eip' `readlink -f \`which ruby\``
+```
+
 ## Configuration
 
 ```

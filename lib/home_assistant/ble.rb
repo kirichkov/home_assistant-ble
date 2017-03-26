@@ -56,8 +56,9 @@ module HomeAssistant
       def debug(message)
         log 'Set DEBUG environment variable to activate debug logs' unless ENV['DEBUG'] || @debug_tip
         @debug_tip = true
+        return unless ENV['DEBUG']
         print '(debug) '
-        puts message if ENV['DEBUG']
+        puts message
       end
 
       def detect_devices
@@ -106,6 +107,7 @@ module HomeAssistant
 
       def adapter
         @adapter ||= begin
+                       ensure_rights!
                        iface = BLE::Adapter.list.first
                        debug "Selecting #{iface} to listen for bluetooth events"
                        raise 'Unable to find a bluetooth device' unless iface
@@ -114,6 +116,14 @@ module HomeAssistant
                          a.start_discovery
                        end
                      end
+      end
+
+      def ensure_rights!
+        BLE::Adapter.list.first
+      rescue DBus::Error => e
+        raise unless e.message =~ /DBus.Error.AccessDenied/
+        log 'Not enough rights to use bluetooth device, read https://github.com/kamaradclimber/home_assistant-ble'
+        exit 1
       end
     end
   end
