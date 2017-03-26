@@ -1,5 +1,8 @@
 # HomeAssistant::Ble
 
+[![Build Status](https://travis-ci.org/kamaradclimber/home_assistant-ble.svg?branch=master)](https://travis-ci.org/kamaradclimber/home_assistant-ble)
+[![Gem Version](https://badge.fury.io/rb/home_assistant-ble.svg)](https://badge.fury.io/rb/home_assistant-ble)
+
 Companion app from home-assistant sending BLE events.
 
 Since HA does not cope well with bluetooth device tracking (https://home-assistant.io/components/device_tracker.bluetooth_le_tracker/) this app runs along home-assistant and sends device tracking to it.
