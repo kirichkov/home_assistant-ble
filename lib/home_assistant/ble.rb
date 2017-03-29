@@ -52,6 +52,7 @@ module HomeAssistant
         loop do
           detect_devices
           clean_devices
+          release_adapter
           debug "Will sleep #{interval}s before relisting devices"
           sleep interval
         end
@@ -124,8 +125,15 @@ module HomeAssistant
                        BLE::Adapter.new(iface).tap do |a|
                          debug 'Activating discovery'
                          a.start_discovery
+                         debug 'Sleeping a bit to discover devices'
+                         sleep 20
+                         a.stop_discovery
                        end
                      end
+      end
+
+      def release_adapter
+        @adapter = nil
       end
 
       def ensure_rights!
