@@ -5,6 +5,7 @@ require 'net/http'
 require 'uri'
 require 'json'
 require 'cap2'
+require 'digest/md5'
 
 module HomeAssistant
   module Ble
@@ -44,12 +45,17 @@ module HomeAssistant
           YAML.load_file(config['home_assistant_devices_file']).each do |name, conf|
             next unless conf['mac'] =~ /^(ble_|bt_)/i
             next unless conf['track']
-            mac = conf['mac'].gsub(/^(ble_|bt_)/i, '').upcase
-            devices[mac] = name
+            mac = conf.delete('mac').gsub(/^(ble_|bt_)/i, '').upcase
+            conf['name'] = name # erase name with HA id
+            devices[mac] = conf
             debug "Adding #{mac} (#{name}) found in known_devices.yaml"
           end
         end
-        devices.merge!(config['home_assistant_devices']) if config['home_assistant_devices']
+        if config['home_assistant_devices']
+          config['home_assistant_devices'].each do |mac, name|
+            devices[mac] = Mash.new( name: name )
+          end
+        end
       end
 
       def run
@@ -98,12 +104,23 @@ module HomeAssistant
         end
       end
 
-      def update_home_assistant(ha_name, state)
+      def state_update(ha_conf, state)
+        attributes = {}
+        attributes['entity_picture'] = ha_conf['picture']
+        if ha_conf['gravatar']
+          hash = Digest::MD5.hexdigest(ha_conf['gravatar'].downcase)
+          attributes['entity_picture'] = "https://www.gravatar.com/avatar/#{hash}"
+        end
+        JSON.dump('state' => state, 'attributes' => attributes)
+      end
+
+      def update_home_assistant(ha_conf, state)
+        ha_name = ha_conf['name']
         uri = URI.join(home_assistant_url, "api/states/device_tracker.#{ha_name}")
         request = Net::HTTP::Post.new(uri)
         request.content_type = 'application/json'
         request['X-Ha-Access'] = home_assistant_password if home_assistant_password
-        request.body = JSON.dump('state' => state)
+        request.body = state_update(ha_conf, state) 
         req_options = { use_ssl: uri.scheme == 'https' }
 
         response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
