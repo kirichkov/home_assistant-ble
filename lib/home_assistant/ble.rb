@@ -16,6 +16,10 @@ module HomeAssistant
         @known_devices = {}
       end
 
+      def discovery_time
+        config['discovery_time'] || 60
+      end
+
       # polling interval
       def interval
         config['interval'] || 30
@@ -50,9 +54,9 @@ module HomeAssistant
 
       def run
         loop do
-          detect_devices
+          discover
+          detect_new_devices
           clean_devices
-          release_adapter
           debug "Will sleep #{interval}s before relisting devices"
           sleep interval
         end
@@ -72,7 +76,7 @@ module HomeAssistant
         puts message
       end
 
-      def detect_devices
+      def detect_new_devices
         adapter.devices.each do |name|
           unless known_devices.key?(name)
             log "Just discovered #{name}"
@@ -122,18 +126,20 @@ module HomeAssistant
                        iface = BLE::Adapter.list.first
                        debug "Selecting #{iface} to listen for bluetooth events"
                        raise 'Unable to find a bluetooth device' unless iface
-                       BLE::Adapter.new(iface).tap do |a|
-                         debug 'Activating discovery'
-                         a.start_discovery
-                         debug 'Sleeping a bit to discover devices'
-                         sleep 20
-                         a.stop_discovery
-                       end
+                       BLE::Adapter.new(iface)
                      end
       end
 
-      def release_adapter
-        @adapter = nil
+      def discover
+        debug 'Cleaning old devices'
+        adapter.devices.dup.each do |d|
+          adapter[d].remove
+        end
+        debug 'Activating discovery'
+        adapter.start_discovery
+        debug 'Sleeping a bit to discover devices'
+        sleep discovery_time
+        adapter.stop_discovery
       end
 
       def ensure_rights!
