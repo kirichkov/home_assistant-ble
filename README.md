@@ -9,8 +9,11 @@ Since HA does not cope well with bluetooth device tracking (https://home-assista
 
 ## Installation
 
+For raspbian install required packages:
 
-$ `gem install home_assistant-ble`
+    $ sudo apt-get install ruby-dev libcap-dev
+
+    $ gem install home_assistant-ble
 
 ## Usage
 
