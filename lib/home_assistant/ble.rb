@@ -53,11 +53,11 @@ module HomeAssistant
         end
         if config['home_assistant_devices']
           config['home_assistant_devices'].each do |mac, name|
-            devices[mac] = Mash.new( name: name )
+            devices[mac] = Mash.new(name: name)
           end
         end
 
-        return devices
+        devices
       end
 
       def run
@@ -122,7 +122,7 @@ module HomeAssistant
         request = Net::HTTP::Post.new(uri)
         request.content_type = 'application/json'
         request['X-Ha-Access'] = home_assistant_password if home_assistant_password
-        request.body = state_update(ha_conf, state) 
+        request.body = state_update(ha_conf, state)
         req_options = { use_ssl: uri.scheme == 'https' }
 
         response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
