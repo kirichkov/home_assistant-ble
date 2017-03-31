@@ -56,6 +56,8 @@ module HomeAssistant
             devices[mac] = Mash.new( name: name )
           end
         end
+
+        return devices
       end
 
       def run
