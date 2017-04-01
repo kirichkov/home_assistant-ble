@@ -47,12 +47,12 @@ module HomeAssistant
             next unless conf['track']
             mac = conf['mac'].gsub(/^(ble_|bt_)/i, '').upcase
             conf['dev_id'] = name
-            devices[mac] = conf.select { |k, v| ['dev_id', 'mac', 'name'].include? k }
+            devices[mac] = conf.select { |k, _v| %w(dev_id mac name).include? k }
             debug "Adding #{mac} (#{conf['name']}) found in known_devices.yaml"
           end
         end
         if config['home_assistant_devices']
-          config['home_assistant_devices'].each do |mac, name|
+          config['home_assistant_devices'].each do |mac, _name|
             ble_mac = "BLE_#{mac.upcase}" unless mac =~ /^(ble_|bt_)/i
             devices[mac] = Mash.new(mac: ble_mac)
           end
@@ -109,7 +109,7 @@ module HomeAssistant
 
       def update_home_assistant(ha_conf, state)
         ha_conf['location_name'] = state
-        uri = URI.join(home_assistant_url, "/api/services/device_tracker/see")
+        uri = URI.join(home_assistant_url, '/api/services/device_tracker/see')
         request = Net::HTTP::Post.new(uri)
         request.content_type = 'application/json'
         request['X-Ha-Access'] = home_assistant_password if home_assistant_password
