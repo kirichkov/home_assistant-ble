@@ -45,15 +45,16 @@ module HomeAssistant
           YAML.load_file(config['home_assistant_devices_file']).each do |name, conf|
             next unless conf['mac'] =~ /^(ble_|bt_)/i
             next unless conf['track']
-            mac = conf.delete('mac').gsub(/^(ble_|bt_)/i, '').upcase
-            conf['name'] = name # erase name with HA id
-            devices[mac] = conf
-            debug "Adding #{mac} (#{name}) found in known_devices.yaml"
+            mac = conf['mac'].gsub(/^(ble_|bt_)/i, '').upcase
+            conf['dev_id'] = name
+            devices[mac] = conf.select { |k, _v| %w(dev_id mac name).include? k }
+            debug "Adding #{mac} (#{conf['name']}) found in known_devices.yaml"
           end
         end
         if config['home_assistant_devices']
-          config['home_assistant_devices'].each do |mac, name|
-            devices[mac] = Mash.new(name: name)
+          config['home_assistant_devices'].each do |mac, _name|
+            ble_mac = "BLE_#{mac.upcase}" unless mac =~ /^(ble_|bt_)/i
+            devices[mac] = Mash.new(mac: ble_mac)
           end
         end
 
@@ -106,23 +107,13 @@ module HomeAssistant
         end
       end
 
-      def state_update(ha_conf, state)
-        attributes = {}
-        attributes['entity_picture'] = ha_conf['picture']
-        if ha_conf['gravatar']
-          hash = Digest::MD5.hexdigest(ha_conf['gravatar'].downcase)
-          attributes['entity_picture'] = "https://www.gravatar.com/avatar/#{hash}"
-        end
-        JSON.dump('state' => state, 'attributes' => attributes)
-      end
-
       def update_home_assistant(ha_conf, state)
-        ha_name = ha_conf['name']
-        uri = URI.join(home_assistant_url, "api/states/device_tracker.#{ha_name}")
+        ha_conf['location_name'] = state
+        uri = URI.join(home_assistant_url, '/api/services/device_tracker/see')
         request = Net::HTTP::Post.new(uri)
         request.content_type = 'application/json'
         request['X-Ha-Access'] = home_assistant_password if home_assistant_password
-        request.body = state_update(ha_conf, state)
+        request.body = ha_conf.to_json
         req_options = { use_ssl: uri.scheme == 'https' }
 
         response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
@@ -130,10 +121,10 @@ module HomeAssistant
         end
 
         if response.code.to_i == 200
-          debug "State update #{state} sent to HA for #{ha_name}"
+          debug "State update #{state} sent to HA for #{ha_conf['dev_id']}"
           debug response.body
         else
-          log "Error while sending #{state} to HA form #{ha_name}."
+          log "Error while sending #{state} to HA form #{ha_conf['dev_id']}."
           log "URI was: #{uri}. Response was:"
           log response.body
         end
