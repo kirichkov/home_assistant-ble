@@ -116,8 +116,15 @@ module HomeAssistant
         request.body = ha_conf.to_json
         req_options = { use_ssl: uri.scheme == 'https' }
 
-        response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
-          http.request(request)
+        begin
+          response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
+            http.request(request)
+          end
+        rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError,
+               Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError,
+               Net::ProtocolError, Errno::ECONNREFUSED => e
+          log "Could not update HA: #{e.message}"
+          return
         end
 
         if response.code.to_i == 200
