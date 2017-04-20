@@ -11,11 +11,18 @@ $stderr.sync = true
 
 def shut_down
   @detector.clean_all_devices
-  $stdout.puts "Quitting"
+  $stdout.puts 'Quitting'
 end
 
-Signal.trap("INT") { shut_down; exit; }
-Signal.trap("TERM") { shut_down; exit; }
+Signal.trap('INT') do
+  shut_down
+  exit
+end
+
+Signal.trap('TERM') do
+  shut_down
+  exit
+end
 
 config_file = ARGV.shift
 config = {}

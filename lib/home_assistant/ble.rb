@@ -73,7 +73,7 @@ module HomeAssistant
 
       def clean_all_devices
         known_devices.keys.each do |name|
-          known_devices.delete(name).tap do |last_seen|
+          known_devices.delete(name).tap do
             home_assistant_devices[name] && update_home_assistant(home_assistant_devices[name], :not_home)
           end
         end
