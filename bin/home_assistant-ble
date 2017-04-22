@@ -9,6 +9,21 @@ require 'yaml'
 $stdout.sync = true
 $stderr.sync = true
 
+def shut_down
+  @detector.clean_all_devices
+  $stdout.puts 'Quitting'
+end
+
+Signal.trap('INT') do
+  shut_down
+  exit
+end
+
+Signal.trap('TERM') do
+  shut_down
+  exit
+end
+
 config_file = ARGV.shift
 config = {}
 if config_file
@@ -17,6 +32,6 @@ else
   $stderr.puts 'No configuration file specified, will use all default values'
 end
 
-detector = HomeAssistant::Ble::Detector.new(config)
+@detector = HomeAssistant::Ble::Detector.new(config)
 
-detector.run
+@detector.run
