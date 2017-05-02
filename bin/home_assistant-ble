@@ -11,15 +11,17 @@ $stderr.sync = true
 
 def shut_down
   @detector.clean_all_devices
-  $stdout.puts 'Quitting'
+  $stdout.puts 'Quitting...'
 end
 
 Signal.trap('INT') do
+  $stdout.puts 'Received SIGINT.'
   shut_down
   exit
 end
 
 Signal.trap('TERM') do
+  $stdout.puts 'Received SIGTERM.'
   shut_down
   exit
 end
@@ -34,4 +36,10 @@ end
 
 @detector = HomeAssistant::Ble::Detector.new(config)
 
-@detector.run
+begin
+  @detector.run
+rescue ScriptError
+  # If no BLE interface is available clean up and exit
+  $stdout.puts 'No Bluetooth interfaces available.'
+  shut_down
+end
