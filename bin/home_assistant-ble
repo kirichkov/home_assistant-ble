@@ -2,6 +2,8 @@
 
 require 'home_assistant/ble'
 require 'yaml'
+require 'optparse'
+require 'byebug'
 
 # force stdout/stderr to flush immediately
 # this will allow to follow logs when launched via systemd
@@ -26,12 +28,35 @@ Signal.trap('TERM') do
   exit
 end
 
-config_file = ARGV.shift
+options = {}
 config = {}
-if config_file
-  config = YAML.load_file(config_file)
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: example.rb [options]"
+
+  opts.on('-v', '--[no-]verbose', 'Run verbosely') do |v|
+    options[:verbose] = v
+  end
+
+  opts.on('-c CONFIG_FILE', '--config CONFIG_FILE', 'Specify config file') do |config_file|
+    options[:config_file] = config_file
+  end
+
+  opts.on('-f', 'Run in foreground') do |run_in_foreground|
+    options[:run_in_foreground] = run_in_foreground
+  end
+end.parse!
+
+if options[:config_file]
+  config = YAML.load_file(options[:config_file])
 else
   $stderr.puts 'No configuration file specified, will use all default values'
+end
+
+if not options[:run_in_foreground]
+  Process.daemon(true)
+else
+  $stdout.puts "Continuing in foreground" if options[:verbose]
 end
 
 @detector = HomeAssistant::Ble::Detector.new(config)
