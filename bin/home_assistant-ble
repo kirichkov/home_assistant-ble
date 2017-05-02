@@ -12,7 +12,7 @@ $stdout.sync = true
 $stderr.sync = true
 
 @options = {
-  pid_file: "/run/home_assistant-ble.pid",
+  pid_file: '/run/home_assistant-ble.pid',
   verbose: false
 }
 config = {}
@@ -21,9 +21,7 @@ def shut_down
   @detector.clean_all_devices
   $stdout.puts 'Quitting...'
 
-  if @options[:pid_file] && !@options[:run_in_foreground]
-    File.unlink(@options[:pid_file])
-  end
+  File.unlink(@options[:pid_file]) if @options[:pid_file] && !@options[:run_in_foreground]
 end
 
 Signal.trap('INT') do
@@ -39,7 +37,7 @@ Signal.trap('TERM') do
 end
 
 OptionParser.new do |opts|
-  opts.banner = "Usage: home_assistant-ble [options]"
+  opts.banner = 'Usage: home_assistant-ble [options]'
 
   opts.on('-v', '--[no-]verbose', 'Run verbosely') do |v|
     @options[:verbose] = v
@@ -64,15 +62,15 @@ else
   $stderr.puts 'No configuration file specified, will use all default values'
 end
 
-unless @options[:run_in_foreground]
+if @options[:run_in_foreground]
+  $stdout.puts 'Continuing in foreground' if @options[:verbose]
+else
   Process.daemon(true, @options[:verbose])
 
   if @options[:pid_file]
     File.open(@options[:pid_file], 'w') { |f| f.write Process.pid }
-    $stdout.puts "Writing pid to #{@options[:pid_file]}" if @options[:verbose]  
+    $stdout.puts "Writing pid to #{@options[:pid_file]}" if @options[:verbose]
   end
-else
-  $stdout.puts 'Continuing in foreground' if @options[:verbose]
 end
 
 @detector = HomeAssistant::Ble::Detector.new(config)
