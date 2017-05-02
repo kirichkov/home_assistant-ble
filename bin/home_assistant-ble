@@ -11,9 +11,19 @@ require 'byebug'
 $stdout.sync = true
 $stderr.sync = true
 
+@options = {
+  pid_file: "/run/home_assistant-ble.pid",
+  verbose: false
+}
+config = {}
+
 def shut_down
   @detector.clean_all_devices
   $stdout.puts 'Quitting...'
+
+  if @options[:pid_file]
+    File.unlink(@options[:pid_file])
+  end
 end
 
 Signal.trap('INT') do
@@ -28,35 +38,41 @@ Signal.trap('TERM') do
   exit
 end
 
-options = {}
-config = {}
-
 OptionParser.new do |opts|
-  opts.banner = "Usage: example.rb [options]"
+  opts.banner = "Usage: home_assistant-ble [options]"
 
   opts.on('-v', '--[no-]verbose', 'Run verbosely') do |v|
-    options[:verbose] = v
+    @options[:verbose] = v
   end
 
   opts.on('-c CONFIG_FILE', '--config CONFIG_FILE', 'Specify config file') do |config_file|
-    options[:config_file] = config_file
+    @options[:config_file] = config_file
   end
 
   opts.on('-f', 'Run in foreground') do |run_in_foreground|
-    options[:run_in_foreground] = run_in_foreground
+    @options[:run_in_foreground] = run_in_foreground
+  end
+
+  opts.on('-p PID_FILE', '--[no-]pid-file PID_FILE', 'PID file location') do |pid_file|
+    @options[:pid_file] = pid_file
   end
 end.parse!
 
-if options[:config_file]
-  config = YAML.load_file(options[:config_file])
+if @options[:config_file]
+  config = YAML.load_file(@options[:config_file])
 else
   $stderr.puts 'No configuration file specified, will use all default values'
 end
 
-if not options[:run_in_foreground]
-  Process.daemon(true)
+unless @options[:run_in_foreground]
+  Process.daemon(true, @options[:verbose])
+
+  if @options[:pid_file]
+    File.open(@options[:pid_file], 'w') { |f| f.write Process.pid }
+    $stdout.puts "Writing pid to #{@options[:pid_file]}" if @options[:verbose]  
+  end
 else
-  $stdout.puts "Continuing in foreground" if options[:verbose]
+  $stdout.puts 'Continuing in foreground' if @options[:verbose]
 end
 
 @detector = HomeAssistant::Ble::Detector.new(config)
