@@ -21,7 +21,7 @@ def shut_down
   @detector.clean_all_devices
   $stdout.puts 'Quitting...'
 
-  if @options[:pid_file]
+  if @options[:pid_file] && !@options[:run_in_foreground]
     File.unlink(@options[:pid_file])
   end
 end
