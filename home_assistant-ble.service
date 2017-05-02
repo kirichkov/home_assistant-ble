@@ -7,7 +7,9 @@ After=network.target
 #Group=hass
 
 Environment=RUBYOPT="-w0"
-ExecStart=/usr/bin/home_assistant-ble /var/lib/hass/ble.yml
+Type=forking
+ExecStart=/usr/bin/home_assistant-ble -c /var/lib/hass/ble.yml
+PIDFile=/run/home_assistant-ble.pid
 
 [Install]
 WantedBy=multi-user.target

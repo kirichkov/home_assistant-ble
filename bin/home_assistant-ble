@@ -2,6 +2,8 @@
 
 require 'home_assistant/ble'
 require 'yaml'
+require 'optparse'
+require 'byebug'
 
 # force stdout/stderr to flush immediately
 # this will allow to follow logs when launched via systemd
@@ -9,9 +11,17 @@ require 'yaml'
 $stdout.sync = true
 $stderr.sync = true
 
+@options = {
+  pid_file: '/run/home_assistant-ble.pid',
+  verbose: false
+}
+config = {}
+
 def shut_down
   @detector.clean_all_devices
   $stdout.puts 'Quitting...'
+
+  File.unlink(@options[:pid_file]) if @options[:pid_file] && !@options[:run_in_foreground]
 end
 
 Signal.trap('INT') do
@@ -26,12 +36,41 @@ Signal.trap('TERM') do
   exit
 end
 
-config_file = ARGV.shift
-config = {}
-if config_file
-  config = YAML.load_file(config_file)
+OptionParser.new do |opts|
+  opts.banner = 'Usage: home_assistant-ble [options]'
+
+  opts.on('-v', '--[no-]verbose', 'Run verbosely') do |v|
+    @options[:verbose] = v
+  end
+
+  opts.on('-c CONFIG_FILE', '--config CONFIG_FILE', 'Specify config file') do |config_file|
+    @options[:config_file] = config_file
+  end
+
+  opts.on('-f', 'Run in foreground') do |run_in_foreground|
+    @options[:run_in_foreground] = run_in_foreground
+  end
+
+  opts.on('-p PID_FILE', '--[no-]pid-file PID_FILE', 'PID file location') do |pid_file|
+    @options[:pid_file] = pid_file
+  end
+end.parse!
+
+if @options[:config_file]
+  config = YAML.load_file(@options[:config_file])
 else
   $stderr.puts 'No configuration file specified, will use all default values'
+end
+
+if @options[:run_in_foreground]
+  $stdout.puts 'Continuing in foreground' if @options[:verbose]
+else
+  Process.daemon(true, @options[:verbose])
+
+  if @options[:pid_file]
+    File.open(@options[:pid_file], 'w') { |f| f.write Process.pid }
+    $stdout.puts "Writing pid to #{@options[:pid_file]}" if @options[:verbose]
+  end
 end
 
 @detector = HomeAssistant::Ble::Detector.new(config)
