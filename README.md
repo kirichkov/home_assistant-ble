@@ -17,11 +17,19 @@ For raspbian install required packages:
 
 ## Usage
 
-Run `home_assistant-ble [your config file]` binary.
+Run `home_assistant-ble -c [your config file]` binary.
+
+The following command line options are recognized
+
+    -c CONFIG_FILE  - location of the config file
+    -v              - verbose
+    -f              - run in foreground
+    -p PID_FILE     - where to write the PID file
 
 ### Systemd
 
-To launch as a systemd service, you can copy `home_assistant-ble.service` file present in this repo.
+To launch as a systemd service, you can copy `home_assistant-ble.service` file present in this repo. 
+If you want to run the service using a different user/group you need to make sure that the PID file can be written to /run. By default the run directory is writable only by root, so you will need to write the PID at a different location.
 
 I'll probably build an archlinux package at some point (TODO).
 
