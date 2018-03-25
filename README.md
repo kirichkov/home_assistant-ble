@@ -27,7 +27,25 @@ I'll probably build an archlinux package at some point (TODO).
 
 
 ### Non noot
-To be able to run with a non-root user, read http://unix.stackexchange.com/questions/96106/bluetooth-le-scan-as-non-root. In short (adapt if using a non-debian distribution):
+
+Running as non-root on recent Raspbian, Ubuntu and Debian-based distros requires changes to DBus configuration and adding the user to the `bluetooth` group. For more information check this [stackexchange post](https://unix.stackexchange.com/questions/348441/how-to-allow-non-root-systemd-service-to-use-dbus-for-ble-operation/348449#348449).
+
+Make sure you have the following in your `/etc/dbus-1/system.d/bluetooth.conf`:
+
+    <!-- allow users of bluetooth group to communicate -->
+    <policy group="bluetooth">
+      <allow send_destination="org.bluez"/>
+      <allow send_interface="org.bluez.GattCharacteristic1"/>
+      <allow send_interface="org.bluez.GattDescriptor1"/>
+      <allow send_interface="org.freedesktop.DBus.ObjectManager"/>
+      <allow send_interface="org.freedesktop.DBus.Properties"/>
+    </policy>
+
+Then reload DBus:
+
+    sudo service dbus reload
+
+In other Linux distros to be able to run with a non-root user, read http://unix.stackexchange.com/questions/96106/bluetooth-le-scan-as-non-root. In short (adapt if using a non-debian distribution):
 
 ```
 sudo apt install libcap2-bin
