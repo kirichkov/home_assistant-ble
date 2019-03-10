@@ -59,7 +59,8 @@ sudo setcap 'cap_net_raw,cap_net_admin+eip' `readlink -f \`which ruby\``
 interval: 30                              # in seconds, interval between device scan. Defaults to 30
 grace_period: 60                          # in seconds, delay before considering a device has disappeared. Defaults to 60
 home_assistant_url: http://localhost:8123 # url to contact home-assistant. Defaults to http://localhost:8123
-home_assistant_password: xxxxx            # non mandatory password to authenticate to home-assistant api. Default is nil
+home_assistant_token: token               # Long lived access token if you're using the `homeassistant` http auth type.
+home_assistant_password: xxxxx            # non mandatory password to authenticate to home-assistant api. Default is nil. If `home_assistant_token` is provided this setting has no effect
 home_assistant_devices:                   # devices whose activity will be sent to home-assistant. Default is empty (no tracked devices)
   F0:5C:F4:EA:BF:C8: nut1                 # [macaddress]: [identifier for home-assistant]
 

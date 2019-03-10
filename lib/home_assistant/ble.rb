@@ -39,6 +39,10 @@ module HomeAssistant
         config['home_assistant_password']
       end
 
+      def home_assistant_token
+        config['home_assistant_token']
+      end
+
       def home_assistant_devices
         devices = {}
         if  config['home_assistant_devices_file']
@@ -121,7 +125,13 @@ module HomeAssistant
         request = Net::HTTP::Post.new(uri)
         request.content_type = 'application/json'
         request['Accept-Encoding'] = 'plain'
-        request['X-Ha-Access'] = home_assistant_password if home_assistant_password
+
+        if home_assistant_token
+          request['Authorization'] = "Bearer #{home_assistant_token}"
+        elsif home_assistant_password
+          request['X-Ha-Access'] = home_assistant_password
+        end
+
         request.body = ha_conf.to_json
         req_options = { use_ssl: uri.scheme == 'https' }
 
