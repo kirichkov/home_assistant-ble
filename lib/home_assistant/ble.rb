@@ -120,6 +120,7 @@ module HomeAssistant
         uri = URI.join(home_assistant_url, '/api/services/device_tracker/see')
         request = Net::HTTP::Post.new(uri)
         request.content_type = 'application/json'
+        request['Accept-Encoding'] = 'identity'
         request['X-Ha-Access'] = home_assistant_password if home_assistant_password
         request.body = ha_conf.to_json
         req_options = { use_ssl: uri.scheme == 'https' }
