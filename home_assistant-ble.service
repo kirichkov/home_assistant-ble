@@ -6,7 +6,7 @@ After=network.target
 #User=hass
 #Group=hass
 
-Environment=RUBYOPT="-w0"
+Environment=RUBYOPT="-W0"
 ExecStart=/usr/bin/home_assistant-ble /var/lib/hass/ble.yml
 
 [Install]
