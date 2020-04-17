@@ -13,7 +13,12 @@ For raspbian install required packages:
 
     $ sudo apt-get install ruby-dev libcap-dev
 
-    $ gem install home_assistant-ble
+Build the gem from source to use the latest version:
+
+    $ git clone https://github.com/kirichkov/home_assistant-ble.git
+    $ cd home_assistant-ble
+    $ gem build home_assistant-ble.gemspec
+    $ sudo gem install home_assistant-ble-1.4.2.gem
 
 ## Usage
 
