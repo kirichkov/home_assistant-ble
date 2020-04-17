@@ -39,6 +39,10 @@ module HomeAssistant
         config['home_assistant_password']
       end
 
+      def home_assistant_token
+        config['home_assistant_token']
+      end
+
       def home_assistant_devices
         devices = {}
         if  config['home_assistant_devices_file']
@@ -47,7 +51,7 @@ module HomeAssistant
             next unless conf['track']
             mac = conf['mac'].gsub(/^(ble_|bt_)/i, '').upcase
             conf['dev_id'] = name
-            devices[mac] = conf.select { |k, _v| %w(dev_id mac name).include? k }
+            devices[mac] = conf.select { |k, _v| %w(dev_id mac).include? k }
             debug "Adding #{mac} (#{conf['name']}) found in known_devices.yaml"
           end
         end
@@ -120,7 +124,14 @@ module HomeAssistant
         uri = URI.join(home_assistant_url, '/api/services/device_tracker/see')
         request = Net::HTTP::Post.new(uri)
         request.content_type = 'application/json'
-        request['X-Ha-Access'] = home_assistant_password if home_assistant_password
+        request['Accept-Encoding'] = 'plain'
+
+        if home_assistant_token
+          request['Authorization'] = "Bearer #{home_assistant_token}"
+        elsif home_assistant_password
+          request['X-Ha-Access'] = home_assistant_password
+        end
+
         request.body = ha_conf.to_json
         req_options = { use_ssl: uri.scheme == 'https' }
 
